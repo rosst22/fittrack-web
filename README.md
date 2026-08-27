@@ -117,11 +117,30 @@ Tests: `npm test` (Vitest, no environment variables or database needed).
 Working and in daily use by its author, deployed on Vercel. It is a personal
 project rather than a product: there is no onboarding, no mobile app, no
 multi-tenant story beyond Supabase RLS, and the dark theme is not
-configurable. The `backend/` FastAPI directory is dead code. Whoop support
-assumes a Whoop developer app in dev mode, which is capped at 10 users.
+configurable. Whoop support assumes a Whoop developer app in dev mode, which
+is capped at 10 users.
 
 Not planned: I am not taking feature requests or maintaining this for other
 people. Fork it if it is useful.
+
+## Deploying
+
+It runs on Vercel with no special configuration — connect the repo, add the
+same variables from `.env.example`, and push.
+
+Two extra variables are needed in Production, and only for the nightly Whoop
+refresh defined in [`vercel.json`](vercel.json):
+
+- `SUPABASE_SERVICE_ROLE_KEY` — the cron has no logged-in user, and Row Level
+  Security scopes every row to `auth.uid()`, so it needs a client that bypasses
+  RLS. Server-side only; never expose it to the browser.
+- `CRON_SECRET` — Vercel sends this as a bearer token, and the route verifies
+  it before doing anything.
+
+Without them `/api/cron/whoop` returns 500 and refuses to run, which is
+deliberate: an unauthenticated endpoint that mutates every user's data should
+fail closed. Whoop data then only refreshes when someone presses **Sync now**.
+Environment variable changes need a redeploy before they take effect.
 
 ## License
 
