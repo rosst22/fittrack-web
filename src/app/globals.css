@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* Fixed dark theme — do not follow the OS light/dark setting, so text is
+   always readable regardless of the user's system preference. */
+:root {
+  --background: #0b0f14;
+  --surface: #151b23;
+  --surface-2: #1c232d;
+  --border: #2a323d;
+  --foreground: #e6edf3;
+  --muted: #9aa4b2;
+  --accent: #10b981;       /* meals / nutrition */
+  --accent-2: #6366f1;     /* workouts */
+  --accent-3: #06b6d4;     /* sleep */
+  --danger: #f87171;
+
+  /* Status colors for goal hit/miss. Reserved for state — never reuse them as
+     an extra series color. Always shipped with a glyph, never color alone. */
+  --status-good: #10b981;
+  --status-miss: #7c8798;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+  --color-danger: var(--danger);
+  --color-status-good: var(--status-good);
+  --color-status-miss: var(--status-miss);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Base form controls — guarantee readable text on a visible field everywhere,
+   so no component can accidentally render white-on-white. */
+input,
+textarea,
+select {
+  background-color: var(--surface-2);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Nav links scroll horizontally on narrow screens instead of overflowing. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
