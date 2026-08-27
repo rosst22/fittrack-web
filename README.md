@@ -40,9 +40,6 @@ meals.png, trends.png and whoop.png, then replace this entire comment
 - **Vitest** for unit tests
 - Deployed on **Vercel**, including a daily cron that refreshes Whoop data
 
-`backend/` holds an unused FastAPI prototype from an earlier design. It is
-kept for reference and is not part of the running app.
-
 ## What it does
 
 - **Meals** — build a meal from ingredients searched against USDA, or photograph
