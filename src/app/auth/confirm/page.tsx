@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// Magic sign-in links land here. Mirrors /auth/reset: the link carries a
-// token (hash) or ?code= (PKCE); exchange it for a session, then go home.
+// Signup confirmation links land here (sign-in itself is password-only).
+// Mirrors /auth/reset: the link carries a token (hash) or ?code= (PKCE);
+// exchange it for a session, then go home. Kept working so the app still
+// behaves if a deployment leaves Supabase email confirmation switched on.
 export default function ConfirmSignInPage() {
   const router = useRouter();
   const supabase = createClient();
