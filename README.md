@@ -10,12 +10,12 @@ control. It is a personal project — the main thing I was learning was how a
 full Next.js App Router app fits together end to end, from Row Level Security
 in the database up to server components and server actions.
 
-## Screenshots
+<!-- SCREENSHOTS
+To add them: save four PNGs into docs/screenshots/ named dashboard.png,
+meals.png, trends.png and whoop.png, then replace this entire comment
+(from <!-- SCREENSHOTS through the closing marker) with the block below.
 
-<!--
-Screenshots go here. Save four PNGs into docs/screenshots/ named
-dashboard.png, meals.png, trends.png and whoop.png, then delete this
-comment and the two lines wrapping the table below.
+## Screenshots
 
 | Dashboard | Meal log |
 | --- | --- |
