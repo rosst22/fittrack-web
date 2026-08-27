@@ -18,6 +18,9 @@ export default function CoachChat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set when the quota guard says a paid plan would lift the limit that was
+  // just hit, so the error can offer a way out instead of a dead end.
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +36,7 @@ export default function CoachChat() {
     const text = input.trim();
     if (!text || busy) return;
     setError(null);
+    setShowUpgrade(false);
     setInput("");
     const next = [...messages, { role: "user" as const, content: text }];
     setMessages(next);
@@ -45,7 +49,11 @@ export default function CoachChat() {
         body: JSON.stringify({ messages: next.slice(1) }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      if (!res.ok) {
+        setShowUpgrade(Boolean(data.upgrade));
+        throw new Error(data.error || "Something went wrong");
+      }
+      setShowUpgrade(false);
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     } catch (err) {
       setError((err as Error).message);
@@ -83,7 +91,16 @@ export default function CoachChat() {
               </div>
             ))}
             {busy && <div className="text-sm text-muted">Coach is thinking…</div>}
-            {error && <div className="text-sm text-red-500">{error}</div>}
+            {error && (
+              <div className="space-y-1 text-sm text-red-500">
+                <div>{error}</div>
+                {showUpgrade && (
+                  <a href="/upgrade" className="inline-block font-medium text-accent underline">
+                    See FitTrack Pro →
+                  </a>
+                )}
+              </div>
+            )}
           </div>
           <form
             onSubmit={(e) => {

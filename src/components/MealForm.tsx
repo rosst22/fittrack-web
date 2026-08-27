@@ -165,6 +165,8 @@ export default function MealForm({ initialMeal }: { initialMeal?: InitialMeal })
   const [photoNote, setPhotoNote] = useState("");
   const [photoAnalyzing, setPhotoAnalyzing] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  // Set when the quota guard says Pro would lift the limit just hit.
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // The photo that will be saved alongside the meal (set once analysis succeeds).
   const [attachedPhotoBlob, setAttachedPhotoBlob] = useState<Blob | null>(null);
@@ -244,6 +246,7 @@ export default function MealForm({ initialMeal }: { initialMeal?: InitialMeal })
     if (!photoFile && !note) return;
     setPhotoAnalyzing(true);
     setPhotoError(null);
+    setShowUpgrade(false);
     try {
       const compressed = photoFile ? await compressImage(photoFile) : null;
       const res = await fetch("/api/coach/photo", {
@@ -251,12 +254,14 @@ export default function MealForm({ initialMeal }: { initialMeal?: InitialMeal })
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           image: compressed?.base64,
-          mediaType: compressed?.mediaType,
           description: note,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Analysis failed");
+      if (!res.ok) {
+        setShowUpgrade(Boolean(data.upgrade));
+        throw new Error(data.error ?? "Analysis failed");
+      }
       if (!Array.isArray(data.ingredients) || data.ingredients.length === 0) {
         throw new Error(
           compressed
@@ -582,7 +587,16 @@ export default function MealForm({ initialMeal }: { initialMeal?: InitialMeal })
               />
             )}
 
-            {photoError && <p className="text-xs text-red-600">{photoError}</p>}
+            {photoError && (
+              <div className="space-y-1">
+                <p className="text-xs text-red-600">{photoError}</p>
+                {showUpgrade && (
+                  <a href="/upgrade" className="text-xs font-medium text-accent underline">
+                    See FitTrack Pro →
+                  </a>
+                )}
+              </div>
+            )}
 
             <button
               onClick={analyzeWithAi}
