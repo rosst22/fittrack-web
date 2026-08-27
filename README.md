@@ -54,6 +54,39 @@ meals.png, trends.png and whoop.png, then replace this entire comment
 - **Goals and trends** — calorie/macro/water targets, 14-day charts, weekly review.
 - **AI coach** — a chat that gets the current day's numbers as context.
 
+## AI limits and Pro
+
+The AI features cost real money per call, so they are metered per user per day,
+with a paid tier that raises the ceiling.
+
+| Per day | Free | Pro |
+| --- | --- | --- |
+| Photo meal scans | 3 | 15 |
+| AI meal estimates | 3 | 30 |
+| Coach messages | 1 | 15 |
+| Spend cap | $0.04 | $0.45 |
+| Coach model | Haiku | Sonnet |
+
+The call allowance alone does not bound cost — one long coach conversation is
+worth many photo scans — so there is a spend cap behind it. Free users get a
+cap too, because a free user generates no revenue and an abusive one is pure
+loss.
+
+**Enforcement lives in one place.** Both this app and the iOS client call the
+same Supabase Edge Functions (`analyze-photo`, `coach-chat`), which hold the
+Anthropic key and check entitlement, quota and spend before anything reaches
+the model. The web routes under `/api/coach/` are thin proxies that forward the
+caller's access token. This app previously enforced its own limits and the two
+implementations had drifted about 25x apart, which is what motivated the
+change: a paywall implemented twice is a paywall that disagrees with itself.
+
+Entitlement is recorded per `(user_id, source)` — Stripe for web, the App Store
+for iOS, plus a promotional source for comped accounts — and the effective tier
+is "pro if any source is currently active", with expiry enforced on read so a
+dropped webhook cannot leave access switched on. Only the webhooks, running as
+the service role, can write it; the client has a select policy and nothing else,
+so a tampered client cannot grant itself Pro.
+
 ## Setup
 
 Requires Node.js 20+ and a free Supabase project.
@@ -112,10 +145,13 @@ Tests: `npm test` (Vitest, no environment variables or database needed).
 ## Status
 
 Working and in daily use by its author, deployed on Vercel. It is a personal
-project rather than a product: there is no onboarding, no mobile app, no
-multi-tenant story beyond Supabase RLS, and the dark theme is not
-configurable. Whoop support assumes a Whoop developer app in dev mode, which
-is capped at 10 users.
+project rather than a product: there is no onboarding, no multi-tenant story
+beyond Supabase RLS, and the dark theme is not configurable. Whoop support
+assumes a Whoop developer app in dev mode, which is capped at 10 users.
+
+A companion iOS client (not in this repo) shares the same Supabase project and
+the same Edge Functions, which is why the AI limits above are enforced there
+rather than in this app.
 
 Not planned: I am not taking feature requests or maintaining this for other
 people. Fork it if it is useful.
